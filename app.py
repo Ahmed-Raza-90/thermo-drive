@@ -14,9 +14,14 @@ except:
         writer = csv.writer(f)
         writer.writerow(["Time", "System", "Value", "Status"])
 
-# --------- STATES ----------
-temperature = 25.0
+# --------- STATE ----------
+temperature = 36.0
 temp_direction = 1
+
+# --------- CONSTANTS ----------
+MIN_SAFE_TEMP = 22       # below this, TOO COLD
+MAX_REALISTIC_TEMP = 60  # realistic max temp
+MIN_REALISTIC_TEMP = -10 # realistic min temp
 
 # --------- ROUTES ----------
 @app.route("/")
@@ -25,32 +30,34 @@ def index():
 
 @app.route("/temperature")
 def temperature_api():
-    global temperature, temp_direction
+    global temperature
+
+    # Get user threshold
     try:
         threshold = float(request.args.get("threshold", 45))
-        if threshold < 36:
-            threshold = 36  # minimum safe threshold
     except:
         threshold = 45
 
-    temperature += random.uniform(0.4, 1.0) * temp_direction
+    # Clamp threshold within realistic limits
+    threshold = max(36, min(threshold, MAX_REALISTIC_TEMP))
 
-    if temperature >= 60:
-        temp_direction = -1
-    if temperature <= 22:
-        temp_direction = 1
+    # Simulate realistic temperature fluctuation (+/-1.5°C per reading)
+    temperature += random.uniform(-1.5, 1.5)
+    temperature = max(MIN_REALISTIC_TEMP, min(temperature, MAX_REALISTIC_TEMP))
 
-    if temperature < 36:
+    # Determine status
+    if temperature < MIN_SAFE_TEMP:
+        status = "TOO COLD"
+    elif temperature < 36:
         status = "NORMAL"
     elif temperature <= threshold:
         status = "WARNING"
     else:
         status = "ALERT"
 
+    # Log to CSV
     with open(LOG_FILE, "a", newline="") as f:
-        csv.writer(f).writerow(
-            [datetime.now(), "Temperature", round(temperature,2), status]
-        )
+        csv.writer(f).writerow([datetime.now(), "Temperature", round(temperature,2), status])
 
     return jsonify({"value": round(temperature,2), "status": status})
 
@@ -58,32 +65,28 @@ def temperature_api():
 def vehicle_api():
     try:
         safe = float(request.args.get("safe", 20))
-        if safe < 10:
-            safe = 10
     except:
         safe = 20
+
+    SAFE_MIN = 10
+    SAFE_MAX = 150
+    safe = max(SAFE_MIN, min(safe, SAFE_MAX))
 
     vehicles = []
     for i in range(random.randint(1,4)):
         dist = random.uniform(5, 150)
-
-        if dist < 10:
+        if dist < SAFE_MIN:
             status = "ALERT"
         elif dist <= safe:
             status = "WARNING"
         else:
             status = "SAFE"
 
-        vehicles.append({
-            "id": i+1,
-            "distance": round(dist,2),
-            "status": status
-        })
+        vehicles.append({"id": i+1, "distance": round(dist,2), "status": status})
 
+        # Log to CSV
         with open(LOG_FILE, "a", newline="") as f:
-            csv.writer(f).writerow(
-                [datetime.now(), f"Vehicle-{i+1}", round(dist,2), status]
-            )
+            csv.writer(f).writerow([datetime.now(), f"Vehicle-{i+1}", round(dist,2), status])
 
     return jsonify(vehicles)
 
