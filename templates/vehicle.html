@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Vehicle Detection System</h2>
+<div class="card p-3 mb-3">
+<label>Safe Distance (cm)</label>
+<input type="number" id="safeDistance" value="20" class="form-control mb-2">
+<div class="d-flex mb-2">
+    <button class="btn btn-primary me-2" onclick="scanVehicle()">Manual Scan</button>
+    <button class="btn btn-success" onclick="toggleAuto()">Toggle Auto</button>
+</div>
+<div id="vehicleList"></div>
+</div>
+
+<script>
+let autoVehicle=false, vehicleInterval=null;
+
+function scanVehicle(){
+    let safe=document.getElementById("safeDistance").value;
+    fetch(`/scan_vehicle?safe=${safe}`)
+    .then(r=>r.json())
+    .then(data=>{
+        let html="<ul class='list-group'>";
+        data.forEach(v=>{
+            html+=`<li class='list-group-item ${v.status=="ALERT"?"status-alert":v.status=="WARNING"?"status-warning":"status-normal"}'>
+                   Vehicle ${v.vehicle_id}: ${v.distance} cm - ${v.status}</li>`;
+        });
+        html+="</ul>";
+        document.getElementById("vehicleList").innerHTML=html;
+    });
+}
+
+function toggleAuto(){
+    autoVehicle=!autoVehicle;
+    if(autoVehicle){
+        vehicleInterval=setInterval(scanVehicle,1500);
+    } else {
+        clearInterval(vehicleInterval);
+    }
+}
+</script>
+{% endblock %}
