@@ -1,6 +1,0 @@
-.status-normal { color: green; font-weight: bold; }
-.status-warning { color: orange; font-weight: bold; }
-.status-alert { color: red; font-weight: bold; animation: flash 1s infinite; }
-@keyframes flash {0%,50%,100%{opacity:1;}25%,75%{opacity:0.3;}}
-.card { border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:15px; background:#fff;}
-body { background:#f5f5f5; font-family:Arial, sans-serif;}

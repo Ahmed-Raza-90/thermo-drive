@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CCP Smart Systems</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { font-family: Arial; background: #eef1f4; padding: 20px; }
+        .box { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        button { padding: 8px 15px; margin: 5px; }
+        .normal { color: green; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .alert { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<h1>Complex Problem Solving Project</h1>
+<p>Temperature Alert System & Vehicle Detection System</p>
+
+<!-- TEMPERATURE -->
+<div class="box">
+    <h2>Temperature Alert System</h2>
+    Threshold:
+    <input type="number" id="tempThreshold" value="45">
+    <br><br>
+    <button onclick="readTemp()">Manual Read</button>
+    <button onclick="toggleTempAuto()">Auto Mode</button>
+    <p>Temperature: <span id="tempValue">--</span> °C</p>
+    <p>Status: <span id="tempStatus">--</span></p>
+    <div id="tempGraph"></div>
+</div>
+
+<!-- VEHICLE -->
+<div class="box">
+    <h2>Vehicle Detection System</h2>
+    Safe Distance:
+    <input type="number" id="safeDistance" value="20">
+    <br><br>
+    <button onclick="scanVehicle()">Manual Scan</button>
+    <button onclick="toggleVehicleAuto()">Auto Mode</button>
+    <div id="vehicleOutput"></div>
+    <div id="vehicleGraph"></div>
+</div>
+
+<script>
+let tempAuto=false, tempInterval=null;
+let vehicleAuto=false, vehicleInterval=null;
+
+function readTemp(){
+    let t=document.getElementById("tempThreshold").value;
+    fetch(`/temperature?threshold=${t}`)
+    .then(r=>r.json())
+    .then(d=>{
+        document.getElementById("tempValue").innerText=d.value;
+        let s=document.getElementById("tempStatus");
+        s.innerText=d.status;
+        s.className=d.status==="ALERT"?"alert":d.status==="WARNING"?"warning":"normal";
+        updateTempGraph();
+    });
+}
+
+function toggleTempAuto(){
+    tempAuto=!tempAuto;
+    tempAuto ? tempInterval=setInterval(readTemp,2000) : clearInterval(tempInterval);
+}
+
+function scanVehicle(){
+    let s=document.getElementById("safeDistance").value;
+    fetch(`/vehicle?safe=${s}`)
+    .then(r=>r.json())
+    .then(d=>{
+        let out="<ul>";
+        d.forEach(v=>{
+            out+=`<li class="${v.status==="ALERT"?"alert":v.status==="WARNING"?"warning":"normal"}">
+            Vehicle ${v.id}: ${v.distance} cm (${v.status})</li>`;
+        });
+        out+="</ul>";
+        document.getElementById("vehicleOutput").innerHTML=out;
+        updateVehicleGraph();
+    });
+}
+
+function toggleVehicleAuto(){
+    vehicleAuto=!vehicleAuto;
+    vehicleAuto ? vehicleInterval=setInterval(scanVehicle,1500) : clearInterval(vehicleInterval);
+}
+
+function updateTempGraph(){
+    fetch("/logs/Temperature")
+    .then(r=>r.json())
+    .then(v=>{
+        Plotly.newPlot("tempGraph", [{y:v, type:"scatter"}], {title:"Temperature Trend"});
+    });
+}
+
+function updateVehicleGraph(){
+    fetch("/logs/Vehicle")
+    .then(r=>r.json())
+    .then(v=>{
+        Plotly.newPlot("vehicleGraph", [{y:v, type:"scatter"}], {title:"Vehicle Distance Trend"});
+    });
+}
+</script>
+
+</body>
+</html>
