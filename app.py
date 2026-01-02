@@ -26,7 +26,12 @@ def index():
 @app.route("/temperature")
 def temperature_api():
     global temperature, temp_direction
-    threshold = float(request.args.get("threshold", 45))
+    try:
+        threshold = float(request.args.get("threshold", 45))
+        if threshold < 36:
+            threshold = 36  # minimum safe threshold
+    except:
+        threshold = 45
 
     temperature += random.uniform(0.4, 1.0) * temp_direction
 
@@ -51,9 +56,14 @@ def temperature_api():
 
 @app.route("/vehicle")
 def vehicle_api():
-    safe = int(request.args.get("safe", 20))
-    vehicles = []
+    try:
+        safe = float(request.args.get("safe", 20))
+        if safe < 10:
+            safe = 10
+    except:
+        safe = 20
 
+    vehicles = []
     for i in range(random.randint(1,4)):
         dist = random.uniform(5, 150)
 
@@ -79,14 +89,15 @@ def vehicle_api():
 
 @app.route("/logs/<system>")
 def logs(system):
-    values = []
+    values, statuses = [], []
     with open(LOG_FILE, "r") as f:
         reader = csv.reader(f)
         next(reader)
         for row in reader:
             if row[1].startswith(system):
-                values.append(row[2])
-    return jsonify(values)
+                values.append(float(row[2]))
+                statuses.append(row[3])
+    return jsonify({"values": values, "statuses": statuses})
 
 if __name__ == "__main__":
     app.run(debug=True)
