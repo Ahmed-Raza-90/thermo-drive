@@ -129,3 +129,10 @@ thermo-drive/
 
 ---
 
+## Full Project Report
+
+You can download the detailed project report here:  
+[Thermo-Drive CCP Report](./Thermo-Drive%20CCP%20Report.pdf)
+
+---
+
