@@ -76,7 +76,7 @@ function updateTempGraph() {
             }
 
             Plotly.newPlot("tempGraph", traces, {
-                title: "Temperature Trend",
+                title: "Temperature",
                 margin: { t: 40 }
             });
         });
@@ -152,7 +152,7 @@ function updateVehicleGraph() {
             }
 
             Plotly.newPlot("vehicleGraph", traces, {
-                title: "Vehicle Distance Trend",
+                title: "Vehicle Distance",
                 margin: { t: 40 }
             });
         });
