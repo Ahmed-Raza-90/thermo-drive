@@ -40,19 +40,45 @@ function updateTempGraph() {
     fetch("/logs/Temperature")
         .then(r => r.json())
         .then(d => {
-            let colors = d.statuses.map(s =>
-                s === "TOO COLD" ? "blue" :
-                s === "NORMAL" ? "green" :
-                s === "WARNING" ? "orange" : "red"
-            );
 
-            Plotly.newPlot("tempGraph", [{
-                x: d.values.map((_, i) => i),
-                y: d.values,
-                mode: "lines+markers",
-                line: { width: 3 },
-                marker: { size: 8, color: colors }
-            }], { title: "Temperature Trend" });
+            let traces = [];
+            let x = d.values.map((_, i) => i);
+
+            let colorMap = {
+                "TOO COLD": "blue",
+                "NORMAL": "green",
+                "WARNING": "orange",
+                "ALERT": "red"
+            };
+
+            for (let i = 0; i < d.values.length; i++) {
+                let color = colorMap[d.statuses[i]];
+
+                // dot
+                traces.push({
+                    x: [x[i]],
+                    y: [d.values[i]],
+                    mode: "markers",
+                    marker: { color: color, size: 8 },
+                    showlegend: false
+                });
+
+                // line segment
+                if (i > 0) {
+                    traces.push({
+                        x: [x[i - 1], x[i]],
+                        y: [d.values[i - 1], d.values[i]],
+                        mode: "lines",
+                        line: { color: color, width: 3 },
+                        showlegend: false
+                    });
+                }
+            }
+
+            Plotly.newPlot("tempGraph", traces, {
+                title: "Temperature Trend",
+                margin: { t: 40 }
+            });
         });
 }
 
@@ -66,8 +92,10 @@ function scanVehicle() {
             let out = "<ul>";
 
             d.forEach(v => {
-                out += `<li class="${v.status === "ALERT" ? "alert" :
-                                   v.status === "WARNING" ? "warning" : "normal"}">
+                out += `<li class="${
+                    v.status === "ALERT" ? "alert" :
+                    v.status === "WARNING" ? "warning" : "normal"
+                }">
                     Vehicle ${v.id}: ${v.distance} cm (${v.status})
                 </li>`;
             });
@@ -89,18 +117,44 @@ function updateVehicleGraph() {
     fetch("/logs/Vehicle")
         .then(r => r.json())
         .then(d => {
-            let colors = d.statuses.map(s =>
-                s === "ALERT" ? "red" :
-                s === "WARNING" ? "orange" : "green"
-            );
 
-            Plotly.newPlot("vehicleGraph", [{
-                x: d.values.map((_, i) => i),
-                y: d.values,
-                mode: "lines+markers",
-                line: { width: 2 },
-                marker: { size: 8, color: colors }
-            }], { title: "Vehicle Distance Trend" });
+            let traces = [];
+            let x = d.values.map((_, i) => i);
+
+            let colorMap = {
+                "NORMAL": "green",
+                "WARNING": "orange",
+                "ALERT": "red"
+            };
+
+            for (let i = 0; i < d.values.length; i++) {
+                let color = colorMap[d.statuses[i]];
+
+                // dot
+                traces.push({
+                    x: [x[i]],
+                    y: [d.values[i]],
+                    mode: "markers",
+                    marker: { color: color, size: 8 },
+                    showlegend: false
+                });
+
+                // line segment
+                if (i > 0) {
+                    traces.push({
+                        x: [x[i - 1], x[i]],
+                        y: [d.values[i - 1], d.values[i]],
+                        mode: "lines",
+                        line: { color: color, width: 2 },
+                        showlegend: false
+                    });
+                }
+            }
+
+            Plotly.newPlot("vehicleGraph", traces, {
+                title: "Vehicle Distance Trend",
+                margin: { t: 40 }
+            });
         });
 }
 
