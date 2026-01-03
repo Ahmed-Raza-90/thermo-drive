@@ -13,6 +13,19 @@ Thermo-Drive is a smart monitoring system for vehicles that tracks temperature l
 
 ---
 
+## User Interface Preview
+
+### Home Screen
+![Home UI](./static/ui/home-ui.png)
+
+### Temperature Monitoring Screen
+![Temperature UI](./static/ui/temperature-ui.png)
+
+### Vehicle Detection Screen
+![Vehicle UI](./static/ui/vehicle-ui.png)
+
+---
+
 ## Features
 - Real-time temperature monitoring with alert thresholds
 - Real-time vehicle detection with configurable safe distance
