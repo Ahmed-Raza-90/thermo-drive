@@ -11,17 +11,10 @@ try:
     open(LOG_FILE, "r")
 except:
     with open(LOG_FILE, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["Time", "System", "Value", "Status"])
+        csv.writer(f).writerow(["Time", "System", "Value", "Status"])
 
 # --------- STATE ----------
 temperature = 36.0
-temp_direction = 1
-
-# --------- CONSTANTS ----------
-MIN_SAFE_TEMP = 22       # below this, TOO COLD
-MAX_REALISTIC_TEMP = 60  # realistic max temp
-MIN_REALISTIC_TEMP = -10 # realistic min temp
 
 # --------- ROUTES ----------
 @app.route("/")
@@ -38,15 +31,12 @@ def temperature_api():
     except:
         threshold = 45
 
-    # Clamp threshold within realistic limits
-    threshold = max(36, min(threshold, MAX_REALISTIC_TEMP))
-
-    # Simulate realistic temperature fluctuation (+/-1.5°C per reading)
+    # Simulate temperature fluctuation
     temperature += random.uniform(-1.5, 1.5)
-    temperature = max(MIN_REALISTIC_TEMP, min(temperature, MAX_REALISTIC_TEMP))
+    temperature = max(-10, min(temperature, 65))
 
     # Determine status
-    if temperature < MIN_SAFE_TEMP:
+    if temperature < 15:
         status = "TOO COLD"
     elif temperature < 36:
         status = "NORMAL"
@@ -55,7 +45,7 @@ def temperature_api():
     else:
         status = "ALERT"
 
-    # Log to CSV
+    # Log
     with open(LOG_FILE, "a", newline="") as f:
         csv.writer(f).writerow([datetime.now(), "Temperature", round(temperature,2), status])
 
@@ -68,14 +58,10 @@ def vehicle_api():
     except:
         safe = 20
 
-    SAFE_MIN = 10
-    SAFE_MAX = 150
-    safe = max(SAFE_MIN, min(safe, SAFE_MAX))
-
     vehicles = []
     for i in range(random.randint(1,4)):
         dist = random.uniform(5, 150)
-        if dist < SAFE_MIN:
+        if dist < 10:
             status = "ALERT"
         elif dist <= safe:
             status = "WARNING"
@@ -84,7 +70,7 @@ def vehicle_api():
 
         vehicles.append({"id": i+1, "distance": round(dist,2), "status": status})
 
-        # Log to CSV
+        # Log
         with open(LOG_FILE, "a", newline="") as f:
             csv.writer(f).writerow([datetime.now(), f"Vehicle-{i+1}", round(dist,2), status])
 

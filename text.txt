@@ -1,0 +1,7 @@
+Complex Problem Solving Mapped
+WP1 (Depth of knowledge required)
+WP2 (Range of conflicting requirements required)
+WP3 (Depth of analysis required)
+
+ Investigate Working principles of Temperature Alert System using Arduino and vehicle detection system in smart vehicles. 
+ 
