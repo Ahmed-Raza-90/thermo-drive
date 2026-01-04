@@ -89,17 +89,22 @@ python app.py
 
 ```
 thermo-drive/
-├── app.py                 # Flask application
-├── system_log.csv         # CSV log file
-├── README.md              # Project documentation
+├── app.py                         # Flask backend application
+├── system_log.csv                 # CSV file for storing sensor logs
+├── README.md                      # Project documentation
+├── Thermo-Drive CCP Report.pdf    # Complete project report (PDF)
 ├── templates/
-│   └── index.html         # HTML template
+│   └── index.html                 # Main HTML UI template
 └── static/
-    ├── script.js          # Frontend JavaScript logic
-    ├── styles.css         # CSS styling
-    └── images/
-        ├── temperature.png
-        └── vehicle.png
+    ├── script.js                  # Frontend JavaScript logic
+    ├── styles.css                 # CSS styling for UI
+    ├── images/                    # Images used inside the web application
+    │   ├── temperature.png
+    │   └── vehicle.png
+    └── ui/                        # UI screenshots shown in README
+        ├── home-ui.png
+        ├── temperature-ui.png
+        └── vehicle-ui.png
 ```
 
 ---
